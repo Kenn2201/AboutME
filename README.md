@@ -1,16 +1,10 @@
 # aboutme
 
-A new Flutter project.
+My very first project in Flutter.
 
-## Getting Started
+it is a simlpe app named "About Me" and information app that allows users to create and store multiple personal contact profiles on their mobile devices. Users can add personal details such as name, age, birthdate, address, and hobbies, even Images! and they can also add a profile picture for their contacts. The app will have a simple and intuitive interface to make it easy for users to navigate and add/edit their profiles.
 
-This project is a starting point for a Flutter application.
+I used Firebase Auth, Firestore for database, Firestorage for image uploads.
 
-A few resources to get you started if this is your first Flutter project:
+download here : <a href="https://drive.google.com/uc?export=download&id=1kPuOd_K-zQLhVpOY6sGi-GIfP0SRH6ym">About-Me V.1.3</a>
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
