@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:aboutme/screens/homepage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:auth/auth.dart';
@@ -7,9 +6,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firebase_app_check/firebase_app_check.dart';
 
-import '../models/models.dart';
 
 
 
@@ -48,45 +45,107 @@ class _AddInformationState extends State<AddInformation> {
             backgroundImage: FileImage(_imageFile!),
             radius: 70,
           ),
-
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: Container(
+              alignment: Alignment.center,
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.8),
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.camera_alt),
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) {
+                      return SafeArea(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ListTile(
+                              leading: const Icon(Icons.photo_camera),
+                              title: const Text('Take a picture'),
+                              onTap: () {
+                                _pickImage(ImageSource.camera);
+                                Navigator.pop(context);
+                              },
+                            ),
+                            ListTile(
+                              leading: const Icon(Icons.photo_library),
+                              title: const Text('Choose from gallery'),
+                              onTap: () {
+                                _pickImage(ImageSource.gallery);
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
         ],
       );
     } else {
-      return CircleAvatar(
-        radius: 70,
-        child: IconButton(
-          icon: const Icon(Icons.camera_alt),
-          onPressed: () {
-            showModalBottomSheet(
-              context: context,
-              builder: (context) {
-                return SafeArea(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ListTile(
-                        leading: const Icon(Icons.photo_camera),
-                        title: const Text('Take a picture'),
-                        onTap: () {
-                          _pickImage(ImageSource.camera);
-                          Navigator.pop(context);
-                        },
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.photo_library),
-                        title: const Text('Choose from gallery'),
-                        onTap: () {
-                          _pickImage(ImageSource.gallery);
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ],
-                  ),
-                );
-              },
-            );
-          },
-        ),
+      return Stack(
+        children: [
+          const CircleAvatar(
+            radius: 70,
+          ),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: Container(
+              alignment: Alignment.center,
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.8),
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.camera_alt),
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) {
+                      return SafeArea(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ListTile(
+                              leading: const Icon(Icons.photo_camera),
+                              title: const Text('Take a picture'),
+                              onTap: () {
+                                _pickImage(ImageSource.camera);
+                                Navigator.pop(context);
+                              },
+                            ),
+                            ListTile(
+                              leading: const Icon(Icons.photo_library),
+                              title: const Text('Choose from gallery'),
+                              onTap: () {
+                                _pickImage(ImageSource.gallery);
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       );
     }
   }
@@ -132,13 +191,12 @@ class _AddInformationState extends State<AddInformation> {
       body: Form(
         key: formKey,
         child: ListView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(30),
           children: [
-
             Center(child: _buildProfileImage()),
-
             TextFormField(
               controller: nametext,
+              maxLength: 50, // Maximum 100 characters allowed
               keyboardType: TextInputType.name,
               decoration: const InputDecoration(
                 hintText: 'Ex: Kenn Vincent A. Nacario',
@@ -147,11 +205,19 @@ class _AddInformationState extends State<AddInformation> {
               validator: (idnum) {
                 return (idnum == '') ? 'Please enter name' : null;
               },
+              onChanged: (value) {
+                setState(() {
+                  // Update the counter when the value changes
+                  nameText = value;
+                });
+              },
             ),
+
 
             const SizedBox(height: 20),
             TextFormField(
               controller: contacttext,
+              maxLength: 10,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
                 hintText: 'Ex. 0997573XXXX',
@@ -162,10 +228,19 @@ class _AddInformationState extends State<AddInformation> {
                     ? 'Please enter a valid Phone Number'
                     : null;
               },
+              onChanged: (value) {
+                setState(() {
+                  // Update the counter when the value changes
+                  nameText = value;
+                });
+              },
             ),
+
+
             const SizedBox(height: 20),
             TextFormField(
               controller: agetext,
+              maxLength: 2,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
                 hintText: 'Ex: 22',
@@ -174,10 +249,18 @@ class _AddInformationState extends State<AddInformation> {
               validator: (idnum) {
                 return (idnum == '') ? 'Please enter age' : null;
               },
+              onChanged: (value) {
+                setState(() {
+                  // Update the counter when the value changes
+                  nameText = value;
+                });
+              },
             ),
+
             const SizedBox(height: 20),
             TextFormField(
               controller: birthdatetext,
+              maxLength: 25,
               keyboardType: TextInputType.datetime,
               decoration: const InputDecoration(
                 hintText: 'Ex: 02/02/2001',
@@ -186,11 +269,18 @@ class _AddInformationState extends State<AddInformation> {
               validator: (idnum) {
                 return (idnum == '') ? 'Please enter birthdate' : null;
               },
+              onChanged: (value) {
+                setState(() {
+                  // Update the counter when the value changes
+                  nameText = value;
+                });
+              },
             ),
 
             const SizedBox(height: 20),
             TextFormField(
               controller: addresstext,
+              maxLength: 50,
               keyboardType: TextInputType.name,
               decoration: const InputDecoration(
                 hintText: 'Ex: Barra Opol, Misamis Oriental',
@@ -199,10 +289,18 @@ class _AddInformationState extends State<AddInformation> {
               validator: (idnum) {
                 return (idnum == '') ? 'Please enter address' : null;
               },
+              onChanged: (value) {
+                setState(() {
+                  // Update the counter when the value changes
+                  nameText = value;
+                });
+              },
             ),
             const SizedBox(height: 20),
+
             TextFormField(
               controller: hobbiestext,
+              maxLength: 50,
               keyboardType: TextInputType.name,
               decoration: const InputDecoration(
                 hintText: 'Ex: ''[biking,fishing,cooking]''',
@@ -211,6 +309,12 @@ class _AddInformationState extends State<AddInformation> {
               validator: (idnum) {
                 return (idnum == '') ? 'Please enter hobbies' : null;
               },
+              onChanged: (value) {
+                setState(() {
+                  // Update the counter when the value changes
+                  nameText = value;
+                });
+              },
             ),
             const SizedBox(height: 20),
             SizedBox(
@@ -218,12 +322,13 @@ class _AddInformationState extends State<AddInformation> {
               child: ElevatedButton(
                 onPressed: () {
                   if (formKey.currentState!.validate()) {
-
-
                     uploadFile();
+                    checkid();
+
+
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Successfully Updated Contact!'),
+                        content: Text('Successfully Added Contact!'),
                         backgroundColor: Colors.green,
                       ),
                     );
@@ -238,6 +343,15 @@ class _AddInformationState extends State<AddInformation> {
         ),
       ),
     );
+  }
+
+
+  void checkid() async{
+    final collectionRef = FirebaseFirestore.instance.collection('myCollection');
+    final querySnapshot = await collectionRef.get();
+    final documentSnapshot = querySnapshot.docs.first;
+    final documentId = documentSnapshot.id;
+    print('This is the ContactId from FireStore: ${documentId}');
   }
 
 

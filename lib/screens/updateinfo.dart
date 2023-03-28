@@ -4,17 +4,18 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:aboutme/models/models.dart';
 import 'homepage.dart';
 
 
 class UpdateInfo extends StatefulWidget {
   final dynamic imageUrl;
+  final dynamic contactData;
+  final dynamic documentId;
 
 
 
 
-  const UpdateInfo({Key? key, required this.imageUrl,}) : super(key: key);
+  const UpdateInfo({Key? key, required this.imageUrl, required this.contactData,required this.documentId}) : super(key: key);
 
   @override
   State<UpdateInfo> createState() => _UpdateInfoState();
@@ -47,18 +48,6 @@ class _UpdateInfoState extends State<UpdateInfo> {
           CircleAvatar(
             backgroundImage: FileImage(_imageFile!),
             radius: 70,
-
-          ),
-
-        ],
-      );
-    } else {
-      return Stack(
-        children: [
-          CircleAvatar(
-            radius: 70,
-            backgroundImage: NetworkImage(widget.imageUrl),
-
           ),
           Positioned(
             bottom: 0,
@@ -108,40 +97,77 @@ class _UpdateInfoState extends State<UpdateInfo> {
           ),
         ],
       );
-
+    } else {
+      return Stack(
+        children: [
+          CircleAvatar(
+            radius: 70,
+            backgroundImage: NetworkImage(widget.imageUrl),
+          ),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: Container(
+              alignment: Alignment.center,
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.8),
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.camera_alt),
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) {
+                      return SafeArea(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ListTile(
+                              leading: const Icon(Icons.photo_camera),
+                              title: const Text('Take a picture'),
+                              onTap: () {
+                                _pickImage(ImageSource.camera);
+                                Navigator.pop(context);
+                              },
+                            ),
+                            ListTile(
+                              leading: const Icon(Icons.photo_library),
+                              title: const Text('Choose from gallery'),
+                              onTap: () {
+                                _pickImage(ImageSource.gallery);
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      );
     }
   }
+
 
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   var formKey = GlobalKey<FormState>();
 
   var url;
 
-  // Future<UserData> getUserData() async {
-  //   final contactsRef = await FirebaseFirestore.instance
-  //       .collection('users')
-  //       .doc(currentuser.uid)
-  //       .collection('contacts')
-  //       .get();
-  //   final documentId = contactsRef.docs.first.id;
-  //   final userDoc = await FirebaseFirestore.instance
-  //       .collection('users')
-  //       .doc(currentuser.uid)
-  //       .collection('contacts')
-  //       .doc(documentId)
-  //       .get();
-  //
-  //
-  //   return null
-  // }
 
-
-  late final nametext = TextEditingController();
-  late final contacttext = TextEditingController();
-  late final agetext = TextEditingController();
-  late final birthdatetext = TextEditingController();
-  late final addresstext = TextEditingController();
-  late final hobbiestext = TextEditingController();
+  late final nametext = TextEditingController(text: widget.contactData['name']);
+  late final contacttext = TextEditingController(text: widget.contactData['contact']);
+  late final agetext = TextEditingController(text: widget.contactData['age']);
+  late final birthdatetext = TextEditingController(text: widget.contactData['birthdate']);
+  late final addresstext = TextEditingController(text: widget.contactData['address']);
+  late final hobbiestext = TextEditingController(text: widget.contactData['hobbies']);
 
 
   @override
@@ -158,57 +184,54 @@ class _UpdateInfoState extends State<UpdateInfo> {
 
 
   Future<void> updateFile() async {
-    if (_imageFile == null) {
-      return;
-    }
+    // Deleting the old image file
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) =>  const HomePage()));
 
-    // Uploading the image file
-    final storageRef = FirebaseStorage.instance.ref().child('users/${currentuser.uid}/images/${nametext.text}');
-    final uploadTask = storageRef.putFile(_imageFile!);
-    final snapshot = await uploadTask.whenComplete(() {});
-    final downloadUrl = await snapshot.ref.getDownloadURL();
-    print('TEST DOWNLOAD URL : ${downloadUrl}');
-    print(url);
-    if (mounted) {
-      setState(() {
-        url = downloadUrl;
-      });
-    }
-    await FirebaseStorage.instance
-        .refFromURL(widget.imageUrl)
-        .delete()
-        .then((_) => print('Image deleted successfully'))
-        .catchError((error) => print('Failed to delete image: $error'));
 
-    // Fetching the document ID
-    final contactsRef = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(currentuser.uid)
-        .collection('contacts')
-        .get();
-    final documentId = contactsRef.docs.first.id;
-
-    // Updating the contact document with new data
     final docRef = FirebaseFirestore.instance
         .collection('users')
         .doc(currentuser.uid)
         .collection('contacts')
-        .doc(documentId);
-
+        .doc(widget.documentId);
     try {
-      await docRef.update({
+      Map<String, dynamic> newData = {
         'name': nametext.text,
         'contact': contacttext.text,
         'age': agetext.text,
         'birthdate': birthdatetext.text,
         'address': addresstext.text,
         'hobbies': hobbiestext.text,
-        'url': downloadUrl.toString()
-      });
+      };
+
+      if (_imageFile != null) {
+        await FirebaseStorage.instance
+            .refFromURL(widget.imageUrl)
+            .delete()
+            .then((_) => print('Old image deleted successfully'))
+            .catchError((error) =>
+            print('Failed to delete old image: $error'));
+
+        // Uploading the new image file
+        final storageRef = FirebaseStorage.instance
+            .ref()
+            .child('users/${currentuser.uid}/images/${nametext.text}');
+        final uploadTask = storageRef.putFile(_imageFile!);
+        final snapshot = await uploadTask.whenComplete(() {});
+        final downloadUrl = await snapshot.ref.getDownloadURL();
+        newData['url'] = downloadUrl.toString();
+
+      }
+
+      await docRef.update(newData);
+      print('Contact data updated successfully');
+
     } catch (e) {
-      // handle error
+      print('Failed to update contact data: $e');
     }
+
   }
+
+
 
 
 
@@ -306,16 +329,16 @@ class _UpdateInfoState extends State<UpdateInfo> {
             SizedBox(
               height: 20,
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async{
                   if (formKey.currentState!.validate()) {
-                    updateFile();
+                    await updateFile();
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Successfully updated Contact!'),
                         backgroundColor: Colors.green,
                       ),
                     );
-                    Navigator.pop(context, MaterialPageRoute(builder: (context) =>  const HomePage()));
+
                   }
                 },
                 child: const Text('Submit'),

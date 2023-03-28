@@ -1,4 +1,5 @@
 
+
 import 'package:aboutme/screens/addinfo.dart';
 import 'package:aboutme/screens/updateinfo.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+
 
 
 class HomePage extends StatefulWidget {
@@ -31,6 +33,35 @@ class _HomePageState extends State<HomePage> {
         .doc(currentuser.uid)
         .collection('contacts')
         .snapshots();
+  }
+
+
+  Future<void> _deleteContact(String documentId,imageId) async {
+    final currentuser1 = FirebaseAuth.instance.currentUser!;
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentuser1.uid)
+          .collection('contacts')
+          .doc(documentId)
+          .delete();
+
+
+      await FirebaseStorage.instance
+          .refFromURL(imageId)
+          .delete()
+          .then((_) => print('Image deleted successfully'))
+          .catchError((error) => print('Failed to delete image: $error'));
+      print('Contact deleted successfully');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Successfully Deleted Contact!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (error) {
+      print('Failed to delete contact: $error');
+    }
   }
 
   @override
@@ -103,7 +134,7 @@ class _HomePageState extends State<HomePage> {
               leading: Icon(Icons.person),
               title: Text('Software Version'),
               subtitle: Text(
-                '1.3',
+                '1.4',
                 style: TextStyle(
                   color: Colors.grey[600],
                 ),
@@ -117,6 +148,12 @@ class _HomePageState extends State<HomePage> {
                 await FirebaseAuth.instance.signOut();
                 Navigator.pushNamedAndRemoveUntil(
                     context, '/login', (route) => false);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Successfully Logged-Out!'),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
               },
             ),
           ],
@@ -142,6 +179,10 @@ class _HomePageState extends State<HomePage> {
                     itemBuilder: (BuildContext context, int index){
                       final contact = data.docs[index].data();
 
+                      final documentId = snapshot.data!.docs[index].id;
+
+                      final contactData = data.docs[index].data();
+                      final imageId = contact['url'];
                       final url = contact['url'];
 
                       return Padding(
@@ -172,59 +213,21 @@ class _HomePageState extends State<HomePage> {
                                   print(url);
                                   Navigator.push(
                                       context,
-                                      MaterialPageRoute(builder: (context) => UpdateInfo(imageUrl: url,))
+                                      MaterialPageRoute(builder: (context) => UpdateInfo(imageUrl: url,contactData: contactData,documentId: documentId,))
                                   );
                                 },
                                 child: Text('Update'),
                               ),
                             ],
                           ),
-
-
                           subtitle: Text(contact['contact']),
                           trailing: IconButton(
                             icon: Icon(Icons.delete),
-                          onPressed: ()async{
-                            try {
-                            final contactsRef = await FirebaseFirestore.instance
-                                  .collection('users')
-                                  .doc(currentuser.uid)
-                                  .collection('contacts')
-                                  .get();
-                            final documentId = contactsRef.docs.first.id;
-                            await FirebaseFirestore.instance
-                                .collection('users')
-                                .doc(currentuser.uid)
-                                .collection('contacts')
-                                .doc(documentId)
-                                .delete();
-
-                              print('Contact deleted successfully');
-                            } catch (error) {
-                              print('Failed to delete contact: $error');
-                            }
-
-                            // delete image file from Firebase Storage
-                            await FirebaseStorage.instance
-                                .refFromURL(contact['url'])
-                                .delete()
-                                .then((_) => print('Image deleted successfully'))
-                                .catchError((error) => print('Failed to delete image: $error'));
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Successfully Deleted Contact!'),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
-
+                          onPressed: (){
+                            _deleteContact(documentId,imageId);
                           },
                           ),
-                          // onTap: () async {
-                          //   await Navigator.push(
-                          //       context,
-                          //       MaterialPageRoute(builder: (context) => const CheckInfo())
-                          //   );
-                          // },
+
                           children: <Widget>[
 
                             Center(
@@ -265,7 +268,9 @@ class _HomePageState extends State<HomePage> {
                     }
                 ),
                 onRefresh: ()async{
+
                   setState(() {
+
                   });
                 }
             );
@@ -285,3 +290,4 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+

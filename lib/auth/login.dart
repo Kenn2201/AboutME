@@ -22,6 +22,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _rememberMe = false;
+  bool _passwordVisible = false;
 
 
   Future<void> _saveUserData() async {
@@ -57,6 +58,9 @@ class _LoginPageState extends State<LoginPage> {
     _loadUserData();
   }
 
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,11 +93,27 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 20.0),
               const Text('Password'),
+
               TextFormField(
                 controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
+                obscureText: !_passwordVisible,
+                decoration: InputDecoration(
                   hintText: 'Enter your password',
+                  suffixIcon: GestureDetector(
+                    onLongPressStart: (details) {
+                      setState(() {
+                        _passwordVisible = true;
+                      });
+                    },
+                    onLongPressEnd: (details) {
+                      setState(() {
+                        _passwordVisible = false;
+                      });
+                    },
+
+
+                    child: Icon(_passwordVisible ? Icons.visibility : Icons.visibility_off),
+                  ),
                 ),
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 validator: (pass){
@@ -175,17 +195,16 @@ class _LoginPageState extends State<LoginPage> {
           password: _passwordController.text,
         );
         print(response);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Successfully Logged In!'),
+            backgroundColor: Colors.green,
+          ),
+        );
       } else {
         // User is already authenticated, no need to sign in again
         print('User already authenticated, skipping sign in');
       }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Successfully Logged In!'),
-          backgroundColor: Colors.green,
-        ),
-      );
 
       navigatorKey.currentState!.popUntil((route) => route.isFirst);
     } on FirebaseAuthException catch (e){
@@ -196,6 +215,10 @@ class _LoginPageState extends State<LoginPage> {
           backgroundColor: Colors.red,
         ),
       );
+    }finally {
+      // Remove the loading indicator after 5 seconds
+      await Future.delayed(Duration(seconds: 1));
+      Navigator.pop(context);
     }
   }
 
