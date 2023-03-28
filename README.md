@@ -6,5 +6,5 @@ it is a simlpe app named "About Me" and information app that allows users to cre
 
 I used Firebase Auth, Firestore for database, Firestorage for image uploads.
 
-download here : <a href="https://drive.google.com/uc?export=download&id=1kPuOd_K-zQLhVpOY6sGi-GIfP0SRH6ym">About-Me/a>
+download here : <a href="https://drive.google.com/uc?export=download&id=1kPuOd_K-zQLhVpOY6sGi-GIfP0SRH6ym">About-Me</a>
 
