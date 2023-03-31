@@ -20,6 +20,7 @@ v1.5
 - user data eentry only updating info but it has image.✓
 - renamed hompage.dart to contacts.dart✓
 - add icon ✓
+
 ===========================
 
 
