@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'homepage.dart';
+import 'contacts.dart';
 
 
 class UpdateInfo extends StatefulWidget {
@@ -159,7 +159,7 @@ class _UpdateInfoState extends State<UpdateInfo> {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   var formKey = GlobalKey<FormState>();
 
-  var url;
+
 
 
   late final nametext = TextEditingController(text: widget.contactData['name']);
@@ -181,11 +181,11 @@ class _UpdateInfoState extends State<UpdateInfo> {
     super.dispose();
   }
 
-
+  String nameText = "";
 
   Future<void> updateFile() async {
     // Deleting the old image file
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) =>  const HomePage()));
+    Navigator.pop(context, MaterialPageRoute(builder: (context) => const HomePage()),);
 
 
     final docRef = FirebaseFirestore.instance
@@ -193,47 +193,29 @@ class _UpdateInfoState extends State<UpdateInfo> {
         .doc(currentuser.uid)
         .collection('contacts')
         .doc(widget.documentId);
-    try {
-      Map<String, dynamic> newData = {
-        'name': nametext.text,
-        'contact': contacttext.text,
-        'age': agetext.text,
-        'birthdate': birthdatetext.text,
-        'address': addresstext.text,
-        'hobbies': hobbiestext.text,
-      };
 
-      if (_imageFile != null) {
-        await FirebaseStorage.instance
-            .refFromURL(widget.imageUrl)
-            .delete()
-            .then((_) => print('Old image deleted successfully'))
-            .catchError((error) =>
-            print('Failed to delete old image: $error'));
+    dynamic url = '';
 
-        // Uploading the new image file
-        final storageRef = FirebaseStorage.instance
-            .ref()
-            .child('users/${currentuser.uid}/images/${nametext.text}');
-        final uploadTask = storageRef.putFile(_imageFile!);
-        final snapshot = await uploadTask.whenComplete(() {});
-        final downloadUrl = await snapshot.ref.getDownloadURL();
-        newData['url'] = downloadUrl.toString();
-
-      }
-
-      await docRef.update(newData);
-      print('Contact data updated successfully');
-
-    } catch (e) {
-      print('Failed to update contact data: $e');
+    if (_imageFile != null) {
+      final ref =
+      FirebaseStorage.instance.ref().child('users/${currentuser.uid}/${nametext.text}');
+      url = await ref.putFile(_imageFile!).then((value) => value.ref.getDownloadURL());
+    } else {
+      url =  widget.imageUrl;
     }
 
+    Map<String, dynamic> newData = {
+      'name': nametext.text,
+      'contact': contacttext.text,
+      'age': agetext.text,
+      'birthdate': birthdatetext.text,
+      'address': addresstext.text,
+      'hobbies': hobbiestext.text,
+      'url': url,
+    };
+
+    await docRef.update(newData);
   }
-
-
-
-
 
 
   @override
@@ -248,86 +230,173 @@ class _UpdateInfoState extends State<UpdateInfo> {
       body: Form(
         key: formKey,
         child: ListView(
-          padding: const EdgeInsets.all(35),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           children: [
             Center(child: _buildProfileImage()),
+            const SizedBox(height: 20),
+
             TextFormField(
               controller: nametext,
               keyboardType: TextInputType.name,
-              decoration: const InputDecoration(
+              maxLength: 50,
+              decoration:  InputDecoration(
                 hintText: 'Ex: Kenn Vincent A. Nacario',
                 labelText: 'Input Name',
+                prefixIcon: Icon(Icons.phone),
+                filled: true,
+                fillColor: Colors.grey[200],
+                contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               validator: (idnum) {
                 return (idnum == '') ? 'Please enter name' : null;
               },
+              onChanged: (value) {
+                setState(() {
+                  // Update the counter when the value changes
+                  nameText = value;
+                });
+              },
+
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 5),
             TextFormField(
               controller: contacttext,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
+              maxLength: 11,
+              decoration:  InputDecoration(
                 hintText: 'Ex. 0997573XXXX',
                 labelText: 'Phone Number',
+                prefixIcon: Icon(Icons.phone),
+                filled: true,
+                fillColor: Colors.grey[200],
+                contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               validator: (idnum) {
                 return (idnum == '')
                     ? 'Please enter a valid Phone Number'
                     : null;
               },
+              onChanged: (value) {
+                setState(() {
+                  // Update the counter when the value changes
+                  nameText = value;
+                });
+              },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 5),
             TextFormField(
               controller: agetext,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
+              maxLength: 2,
+              decoration:  InputDecoration(
                 hintText: 'Ex: 22',
                 labelText: 'Input age',
+                prefixIcon: Icon(Icons.phone),
+                filled: true,
+                fillColor: Colors.grey[200],
+                contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               validator: (idnum) {
                 return (idnum == '') ? 'Please enter age' : null;
               },
+              onChanged: (value) {
+                setState(() {
+                  // Update the counter when the value changes
+                  nameText = value;
+                });
+              },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 5),
             TextFormField(
               controller: birthdatetext,
               keyboardType: TextInputType.datetime,
-              decoration: const InputDecoration(
+              maxLength: 30,
+              decoration:  InputDecoration(
                 hintText: 'Ex: 02/02/2001',
                 labelText: 'Input birthdate',
+                prefixIcon: Icon(Icons.phone),
+                filled: true,
+                fillColor: Colors.grey[200],
+                contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               validator: (idnum) {
                 return (idnum == '') ? 'Please enter birthdate' : null;
               },
+              onChanged: (value) {
+                setState(() {
+                  // Update the counter when the value changes
+                  nameText = value;
+                });
+              },
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 5),
             TextFormField(
               controller: addresstext,
               keyboardType: TextInputType.name,
-              decoration: const InputDecoration(
+              maxLength: 50,
+              decoration:  InputDecoration(
                 hintText: 'Ex: Barra Opol, Misamis Oriental',
                 labelText: 'Input address',
+                prefixIcon: Icon(Icons.phone),
+                filled: true,
+                fillColor: Colors.grey[200],
+                contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               validator: (idnum) {
                 return (idnum == '') ? 'Please enter address' : null;
               },
+              onChanged: (value) {
+                setState(() {
+                  // Update the counter when the value changes
+                  nameText = value;
+                });
+              },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 5),
             TextFormField(
               controller: hobbiestext,
               keyboardType: TextInputType.name,
-              decoration: const InputDecoration(
+              maxLength: 50,
+              decoration:  InputDecoration(
                 hintText: 'Ex: ''[biking,fishing,cooking]''',
                 labelText: 'Input hobbies',
+                prefixIcon: Icon(Icons.phone),
+                filled: true,
+                fillColor: Colors.grey[200],
+                contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               validator: (idnum) {
                 return (idnum == '') ? 'Please enter hobbies' : null;
               },
+              onChanged: (value) {
+                setState(() {
+                  // Update the counter when the value changes
+                  nameText = value;
+                });
+              },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 5),
             SizedBox(
-              height: 20,
+              height: 25,
               child: ElevatedButton(
                 onPressed: () async{
                   if (formKey.currentState!.validate()) {

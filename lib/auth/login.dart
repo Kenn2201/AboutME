@@ -80,46 +80,98 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const Center(child: Text('Log-in',style: TextStyle(fontSize: 32,),),),
               const SizedBox(height: 20.0),
-              const Text('Email'),
+
               TextFormField(
                 controller: _emailController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
+                  labelText: "E-mail",
                   hintText: 'Enter your email',
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                  contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.red),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.blue),
+                  ),
                 ),
                 autovalidateMode: AutovalidateMode.onUserInteraction,
-                validator: (email){
-                  return (email == '') ? 'Please enter email' : null;
+                validator: (email) {
+                  if (email == '') {
+                    return 'Please enter email';
+                  } else {
+                    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                    if (!emailRegex.hasMatch(email!)) {
+                      return 'Please enter a valid email (e.g. example@domain.com)';
+                    }
+                    return null;
+                  }
                 },
               ),
+
+
+
               const SizedBox(height: 20.0),
-              const Text('Password'),
+
 
               TextFormField(
                 controller: _passwordController,
                 obscureText: !_passwordVisible,
                 decoration: InputDecoration(
+                  labelText: 'Password',
                   hintText: 'Enter your password',
-                  suffixIcon: GestureDetector(
-                    onLongPressStart: (details) {
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                  contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.red),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.blue),
+                  ),
+                  suffixIcon: IconButton(
+                    onPressed:(){
                       setState(() {
-                        _passwordVisible = true;
+                        _passwordVisible = !_passwordVisible;
                       });
-                    },
-                    onLongPressEnd: (details) {
-                      setState(() {
-                        _passwordVisible = false;
-                      });
-                    },
-
-
-                    child: Icon(_passwordVisible ? Icons.visibility : Icons.visibility_off),
+                    } ,
+                    icon: Icon(_passwordVisible ? Icons.visibility : Icons.visibility_off),
                   ),
                 ),
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 validator: (pass){
-                  return (pass == '') ? 'Please enter password' : null;
+                  if (pass == '') {
+                    return 'Please enter password';
+                  } else if (pass!.length < 6) {
+                    return 'Password must be at least 6 characters';
+                  } else {
+                    return null;
+                  }
                 },
               ),
+
+
               const SizedBox(height: 20.0),
               Row(
                 children: <Widget>[
@@ -202,8 +254,12 @@ class _LoginPageState extends State<LoginPage> {
           ),
         );
       } else {
-        // User is already authenticated, no need to sign in again
-        print('User already authenticated, skipping sign in');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('User already authenticated, skipping sign in'),
+            backgroundColor: Colors.yellow,
+          ),
+        );
       }
 
       navigatorKey.currentState!.popUntil((route) => route.isFirst);

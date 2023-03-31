@@ -1,7 +1,8 @@
 
 
-import 'package:aboutme/screens/addinfo.dart';
-import 'package:aboutme/screens/updateinfo.dart';
+import 'package:aboutme/screens/addcontacts.dart';
+
+import 'package:aboutme/screens/updatecontacts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -64,99 +65,105 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.yellow[100],
       appBar: AppBar(
-        title: const Text('About Me'),
+        title: const Text('Contacts'),
         elevation: 0,
       ),
       endDrawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.orange, Colors.yellow],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+        child: Container(
+          padding: EdgeInsets.all(2),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.yellow,
+                Colors.white60
+              ],
+            ),
+          ),
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              UserAccountsDrawerHeader(
+                accountEmail: Text('${currentuser.email!}'),
+                accountName: Text('Signed in as:'),
+                currentAccountPicture: const CircleAvatar(
+                  backgroundImage: NetworkImage('https://example.com/profile-picture.jpg'),
                 ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Signed in as:',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.yellow , Colors.white60],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    '${currentuser.email!}',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                ),
+                otherAccountsPictures: [
+                  IconButton(
+                    icon: Icon(Icons.edit),
+                    onPressed: () {
+                    },
                   ),
                 ],
               ),
-            ),
-            ListTile(
-              leading: Icon(Icons.person),
-              title: Text('Developed By:'),
-              subtitle: Text(
-                'Kenn Vincent A. Nacario',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                ),
+              Divider(),
+              ListTile(
+                leading: Icon(Icons.question_mark),
+                title: Text('About App'),
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('About App'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Developed by: Kenn Vincent A. Nacario'),
+                            SizedBox(height: 8),
+                            Text('App version: 1.5'),
+                          ],
+                        ),
+                        actions: <Widget>[
+                          ElevatedButton(
+                            child: Text('OK'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+
+                },
+
               ),
-            ),
-            Divider(),
-            ListTile(
-              leading: Icon(Icons.person),
-              title: Text('From Section:'),
-              subtitle: Text(
-                '3R-1',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                ),
+
+              Divider(color: Colors.grey,),
+              ListTile(
+                leading: Icon(Icons.logout),
+                title: Text('Log out'),
+                onTap: () async {
+                  await FirebaseAuth.instance.signOut();
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, '/login', (route) => false);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Successfully Logged-Out!'),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                },
               ),
-            ),
-            Divider(),
-            ListTile(
-              leading: Icon(Icons.person),
-              title: Text('Software Version'),
-              subtitle: Text(
-                '1.4',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                ),
-              ),
-            ),
-            Divider(),
-            ListTile(
-              leading: Icon(Icons.logout),
-              title: Text('Log out'),
-              onTap: () async {
-                await FirebaseAuth.instance.signOut();
-                Navigator.pushNamedAndRemoveUntil(
-                    context, '/login', (route) => false);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Successfully Logged-Out!'),
-                    backgroundColor: Colors.orange,
-                  ),
-                );
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
 
@@ -228,15 +235,19 @@ class _HomePageState extends State<HomePage> {
                           },
                           ),
 
-                          children: <Widget>[
 
-                            Center(
-                              child: CircleAvatar(
-                                radius: 100,
-                                backgroundImage: NetworkImage(
-                                    contact['url']
+                          children: <Widget>[
+                            Column(
+                              children: [
+                                Center(
+                                  child: CircleAvatar(
+                                    radius: 100,
+                                    backgroundImage: NetworkImage(
+                                        contact['url']
+                                    ),
+                                  ),
                                 ),
-                              ),
+                              ],
                             ),
                             ListTile(
                               title: Text('Name:'),

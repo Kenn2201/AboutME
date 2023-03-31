@@ -1,4 +1,6 @@
-import 'package:aboutme/screens/homepage.dart';
+import 'package:aboutme/auth/login.dart';
+import 'package:aboutme/screens/contacts.dart';
+
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -47,6 +49,7 @@ class MyApp extends StatelessWidget {
           }
         },
       ),
+
     );
   }
 }

@@ -191,37 +191,47 @@ class _AddInformationState extends State<AddInformation> {
       body: Form(
         key: formKey,
         child: ListView(
-          padding: const EdgeInsets.all(30),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           children: [
             Center(child: _buildProfileImage()),
+            SizedBox(height: 5),
             TextFormField(
               controller: nametext,
-              maxLength: 50, // Maximum 100 characters allowed
+              maxLength: 50,
               keyboardType: TextInputType.name,
-              decoration: const InputDecoration(
-                hintText: 'Ex: Kenn Vincent A. Nacario',
-                labelText: 'Input Name',
+              decoration: InputDecoration(
+                labelText: 'Name',
+                hintText: 'Enter your name',
+                prefixIcon: Icon(Icons.person),
+                filled: true,
+                fillColor: Colors.grey[200],
+                contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
-              validator: (idnum) {
-                return (idnum == '') ? 'Please enter name' : null;
-              },
-              onChanged: (value) {
-                setState(() {
-                  // Update the counter when the value changes
-                  nameText = value;
-                });
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your name';
+                }
+                return null;
               },
             ),
-
-
-            const SizedBox(height: 20),
+            SizedBox(height: 5),
             TextFormField(
               controller: contacttext,
-              maxLength: 10,
+              maxLength: 11,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
+              decoration:  InputDecoration(
                 hintText: 'Ex. 0997573XXXX',
                 labelText: 'Phone Number',
+                prefixIcon: Icon(Icons.phone),
+                filled: true,
+                fillColor: Colors.grey[200],
+                contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               validator: (idnum) {
                 return (idnum == '')
@@ -237,14 +247,21 @@ class _AddInformationState extends State<AddInformation> {
             ),
 
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 5),
             TextFormField(
               controller: agetext,
               maxLength: 2,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
+              decoration:  InputDecoration(
                 hintText: 'Ex: 22',
                 labelText: 'Input age',
+                prefixIcon: Icon(Icons.perm_identity),
+                filled: true,
+                fillColor: Colors.grey[200],
+                contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               validator: (idnum) {
                 return (idnum == '') ? 'Please enter age' : null;
@@ -257,14 +274,21 @@ class _AddInformationState extends State<AddInformation> {
               },
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 5),
             TextFormField(
               controller: birthdatetext,
               maxLength: 25,
               keyboardType: TextInputType.datetime,
-              decoration: const InputDecoration(
+              decoration:  InputDecoration(
                 hintText: 'Ex: 02/02/2001',
                 labelText: 'Input birthdate',
+                prefixIcon: Icon(Icons.cake),
+                filled: true,
+                fillColor: Colors.grey[200],
+                contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               validator: (idnum) {
                 return (idnum == '') ? 'Please enter birthdate' : null;
@@ -277,14 +301,21 @@ class _AddInformationState extends State<AddInformation> {
               },
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 5),
             TextFormField(
               controller: addresstext,
               maxLength: 50,
               keyboardType: TextInputType.name,
-              decoration: const InputDecoration(
+              decoration:  InputDecoration(
                 hintText: 'Ex: Barra Opol, Misamis Oriental',
                 labelText: 'Input address',
+                prefixIcon: Icon(Icons.cases_outlined),
+                filled: true,
+                fillColor: Colors.grey[200],
+                contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               validator: (idnum) {
                 return (idnum == '') ? 'Please enter address' : null;
@@ -296,15 +327,22 @@ class _AddInformationState extends State<AddInformation> {
                 });
               },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 5),
 
             TextFormField(
               controller: hobbiestext,
               maxLength: 50,
               keyboardType: TextInputType.name,
-              decoration: const InputDecoration(
+              decoration:  InputDecoration(
                 hintText: 'Ex: ''[biking,fishing,cooking]''',
                 labelText: 'Input hobbies',
+                prefixIcon: Icon(Icons.hourglass_bottom_outlined),
+                filled: true,
+                fillColor: Colors.grey[200],
+                contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               validator: (idnum) {
                 return (idnum == '') ? 'Please enter hobbies' : null;
@@ -316,16 +354,14 @@ class _AddInformationState extends State<AddInformation> {
                 });
               },
             ),
-            const SizedBox(height: 20),
+
+            const SizedBox(height: 5),
             SizedBox(
-              height: 20,
+              height: 35,
               child: ElevatedButton(
                 onPressed: () {
                   if (formKey.currentState!.validate()) {
                     uploadFile();
-                    checkid();
-
-
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Successfully Added Contact!'),
@@ -345,40 +381,22 @@ class _AddInformationState extends State<AddInformation> {
     );
   }
 
-
-  void checkid() async{
-    final collectionRef = FirebaseFirestore.instance.collection('myCollection');
-    final querySnapshot = await collectionRef.get();
-    final documentSnapshot = querySnapshot.docs.first;
-    final documentId = documentSnapshot.id;
-    print('This is the ContactId from FireStore: ${documentId}');
-  }
-
-
   Future<void> uploadFile() async {
-
     final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      print('User is authenticated!');
-    } else {
+    if (user == null) {
       print('User is not authenticated');
-    }
-    print('Current User UID: ${user?.uid}');
-
-    if (_imageFile == null) {
       return;
     }
-    // Uploading the image file
-    final storageRef = FirebaseStorage.instance.ref().child('users/${user?.uid}/images/${nametext.text}');
-    final uploadTask = storageRef.putFile(_imageFile!);
-    final snapshot = await uploadTask.whenComplete(() {});
-    final downloadUrl = await snapshot.ref.getDownloadURL();
-    print('TEST DOWNLOAD URL : ${url}');
-    print(downloadUrl);
-    if (mounted) {
-      setState(() {
-        url = downloadUrl;
-      });
+    print('Current User UID: ${user.uid}');
+
+    String url = '';
+    if (_imageFile != null) {
+      // Uploading the image file
+      final storageRef = FirebaseStorage.instance.ref().child('users/${user.uid}/images/${nametext.text}');
+      final uploadTask = storageRef.putFile(_imageFile!);
+      final snapshot = await uploadTask.whenComplete(() {});
+      url = await snapshot.ref.getDownloadURL();
+      print('Download URL: $url');
     }
 
     final collectionRef = FirebaseFirestore.instance.collection('users/${currentuser.uid}/contacts');
@@ -391,9 +409,10 @@ class _AddInformationState extends State<AddInformation> {
       'birthdate': birthdatetext.text,
       'address': addresstext.text,
       'hobbies': hobbiestext.text,
-      'url': downloadUrl.toString(),
+      'url': url,
     });
   }
+
 
 
 }

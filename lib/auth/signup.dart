@@ -24,6 +24,8 @@ class _SignUpPageState extends State<SignUpPage> {
     _passwordController.dispose();
     super.dispose();
   }
+  bool _passwordVisible = false;
+
 
   @override
   Widget build(BuildContext context) {
@@ -44,30 +46,97 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
               const Center(child: Text('Sign-Up',style: TextStyle(fontSize: 32,),),),
               const SizedBox(height: 20.0),
-              const Text('Email'),
+
               TextFormField(
                 controller: _emailController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
+                  labelText: "E-mail",
                   hintText: 'Enter your email',
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                  contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.red),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.blue),
+                  ),
                 ),
                 autovalidateMode: AutovalidateMode.onUserInteraction,
-                validator: (email){
-                  return (email == '') ? 'Please enter email' : null;
+                validator: (email) {
+                  if (email == '') {
+                    return 'Please enter email';
+                  } else {
+                    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                    if (!emailRegex.hasMatch(email!)) {
+                      return 'Please enter a valid email (e.g. example@domain.com)';
+                    }
+                    return null;
+                  }
                 },
               ),
+
+
+
               const SizedBox(height: 20.0),
-              const Text('Password'),
+
+
               TextFormField(
                 controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
+                obscureText: !_passwordVisible,
+                decoration: InputDecoration(
+                  labelText: 'Password',
                   hintText: 'Enter your password',
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                  contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.red),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.blue),
+                  ),
+                  suffixIcon: IconButton(
+                    onPressed:(){
+                      setState(() {
+                        _passwordVisible = !_passwordVisible;
+                      });
+                    } ,
+                    icon: Icon(_passwordVisible ? Icons.visibility : Icons.visibility_off),
+                  ),
                 ),
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 validator: (pass){
-                  return (pass == '') ? 'Please enter password' : null;
+                  if (pass == '') {
+                    return 'Please enter password';
+                  } else if (pass!.length < 6) {
+                    return 'Password must be at least 6 characters';
+                  } else {
+                    return null;
+                  }
                 },
               ),
+
               const SizedBox(height: 20.0),
               Center(
                 child: ElevatedButton(
@@ -121,16 +190,30 @@ class _SignUpPageState extends State<SignUpPage> {
           backgroundColor: Colors.green,
         ),
       );
-    } on FirebaseAuthException catch (e){
-      print(e);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('The Email is already used by Another user!'),
-          backgroundColor: Colors.red,
-        ),
-      );
+    } on FirebaseAuthException catch (e) {
+      // If the error code is 'invalid-email', show the specific error message
+      if (e.code == 'invalid-email') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('The email address is badly formatted.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      // Otherwise, show a general error message
+      else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('An error occurred. Please try again later.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }finally {
+      // Remove the loading indicator after 5 seconds
+      await Future.delayed(Duration(milliseconds: 500));
+      navigatorKey.currentState!.popUntil((route) => route.isFirst);
     }
 
-    navigatorKey.currentState!.popUntil((route) => route.isFirst);
   }
 }
