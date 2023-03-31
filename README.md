@@ -7,8 +7,10 @@ it is a simlpe app named "About Me" and information app that allows users to cre
 I used Firebase Auth, Firestore for database, Firestorage for image uploads.
 ===========================
 Fixed some of the functions:
+
 v1.5
 03/29/2023
+
 - textformfields back design like professionals ✓
 - still loads when first time sign-up ✓
 - update text fields char limit ✓
